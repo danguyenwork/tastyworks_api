@@ -102,7 +102,7 @@ class Position(object):
         position.quantity_direction = QuantityDirection(input_dict['quantity-direction'])
         position.close_price = Decimal(input_dict['close-price'])
         position.average_open_price = Decimal(input_dict['average-open-price'])
-        position.average_yearly_market_close_price = Decimal(input_dict['average-yearly-market-close-price'])
+        position.average_yearly_market_close_price = Decimal(input_dict.get('average-yearly-market-close-price', 0))
         position.mark = Decimal(input_dict['mark'])
         position.mark_price = Decimal(input_dict['mark-price'])
         position.multiplier = int(input_dict['multiplier'])
