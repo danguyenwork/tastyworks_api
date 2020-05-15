@@ -43,11 +43,49 @@ class TradingAccount(object):
 
         async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
             if resp.status == 201:
-                return Order((await resp.json()).get('data'))
+                return (await resp.json()).get('data')
             elif resp.status == 400:
                 raise Exception('Order execution failed, message: {}'.format(await resp.text()))
             else:
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+
+    async def replace_order(self, order: Order, session, dry_run=True):
+        """
+        Replace an order. If doing a dry run, the order isn't placed but simulated (server-side).
+
+        Args:
+            order (Order): The order object to execute.
+            session (TastyAPISession): The tastyworks session onto which to execute the order.
+            dry_run (bool): Whether to do a test (dry) run.
+
+        Returns:
+            order
+        """
+        if not order.check_is_order_executable():
+            raise Exception('Order is not executable, most likely due to missing data')
+
+        if not session.is_active():
+            raise Exception('The supplied session is not active and valid')
+
+        url = '{}/accounts/{}/orders/{}'.format(
+            session.API_url,
+            self.account_number,
+            order.details.order_id
+        )
+        if dry_run:
+            url = f'{url}/dry-run'
+
+        body = _get_execute_order_json(order)
+        del body['legs'] 
+
+        async with aiohttp.request('PATCH', url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status == 200:
+                return (await resp.json()).get('data')
+            elif resp.status == 400:
+                raise Exception('Order execution failed, message: {}'.format(await resp.text()))
+            else:
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+
 
     @classmethod
     def from_dict(cls, data: dict) -> List:
