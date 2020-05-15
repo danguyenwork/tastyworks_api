@@ -24,7 +24,7 @@ class TradingAccount(object):
             dry_run (bool): Whether to do a test (dry) run.
 
         Returns:
-            bool: Whether the order was successful.
+            order
         """
         if not order.check_is_order_executable():
             raise Exception('Order is not executable, most likely due to missing data')
@@ -43,7 +43,7 @@ class TradingAccount(object):
 
         async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
             if resp.status == 201:
-                return True
+                return (await resp.json()).get('data')
             elif resp.status == 400:
                 raise Exception('Order execution failed, message: {}'.format(await resp.text()))
             else:
