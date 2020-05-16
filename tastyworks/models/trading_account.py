@@ -43,7 +43,7 @@ class TradingAccount(object):
 
         async with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
             if resp.status == 201:
-                return (await resp.json()).get('data')
+                return Order.from_dict((await resp.json()).get('data')).details
             elif resp.status == 400:
                 raise Exception('Order execution failed, message: {}'.format(await resp.text()))
             else:
@@ -80,7 +80,7 @@ class TradingAccount(object):
 
         async with aiohttp.request('PATCH', url, headers=session.get_request_headers(), json=body) as resp:
             if resp.status == 200:
-                return (await resp.json()).get('data')
+                return Order.from_dict((await resp.json()).get('data')).details
             elif resp.status == 400:
                 raise Exception('Order execution failed, message: {}'.format(await resp.text()))
             else:

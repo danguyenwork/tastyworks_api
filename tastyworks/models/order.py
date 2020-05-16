@@ -122,19 +122,20 @@ class Order(Security):
         """
         Parses an Order object from a dict.
         """
-        details = OrderDetails(input_dict['underlying-symbol'])
-        details.order_id = input_dict['id'] if 'id' in input_dict else None
-        details.ticker = input_dict['underlying-symbol'] if 'underlying-symbol' in input_dict else None
-        details.price = Decimal(input_dict['price']) if 'price' in input_dict else None
-        details.stop_trigger = Decimal(input_dict['stop-trigger']) if 'stop-trigger' in input_dict else None
-        details.price_effect = OrderPriceEffect(input_dict['price-effect']) if 'price-effect' in input_dict else None
-        details.type = OrderType(input_dict['order-type'])
-        details.status = OrderStatus(input_dict['status'])
-        details.time_in_force = input_dict['time-in-force']
-        details.gtc_date = input_dict.get('gtc-date', None)
+        input_dict = input_dict.get('order') or input_dict
+        details = OrderDetails(input_dict.get('underlying-symbol')) or OrderDetails(input_dict.get('symbol'))
+        details.order_id = input_dict.get('id')
+        details.ticker = input_dict.get('underlying-symbol')
+        details.price = Decimal(input_dict.get('price', 0))
+        details.stop_trigger = Decimal(input_dict.get('stop-trigger', 0))
+        details.price_effect = OrderPriceEffect(input_dict.get('price-effect'))
+        details.type = OrderType(input_dict.get('order-type'))
+        details.status = OrderStatus(input_dict.get('status'))
+        details.time_in_force = input_dict.get('time-in-force')
+        details.gtc_date = input_dict.get('gtc-date')
         order = cls(order_details=details)
-        for leg in input_dict['legs']:
-            if leg['instrument-type'] == 'Equity Option':
+        for leg in input_dict.get('legs'):
+            if leg.get('instrument-type') == 'Equity Option':
                 leg_obj = order.get_equity_leg_from_dict(leg)
                 order.details.legs.append(leg_obj)
         return order
