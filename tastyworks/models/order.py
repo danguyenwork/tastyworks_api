@@ -27,6 +27,7 @@ class OrderPriceEffect(Enum):
 
 
 class OrderStatus(Enum):
+    ROUTED = 'Routed'
     RECEIVED = 'Received'
     CANCELLED = 'Cancelled'
     FILLED = 'Filled'
