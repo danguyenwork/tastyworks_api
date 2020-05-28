@@ -112,7 +112,7 @@ class Position(object):
         position.restricted_quantity = int(input_dict['restricted-quantity'])
         position.realized_day_gain = Decimal(input_dict['realized-day-gain'])
         position.realized_day_gain_effect = PositionCostEffect(input_dict.get('realized-day-gain-effect', PositionCostEffect.NONE))
-        position.realized_day_gain_date = datetime.strptime(input_dict['realized-day-gain-date'], '%Y-%m-%d').date()
+        position.realized_day_gain_date = datetime.strptime(input_dict.get('realized-day-gain-date', datetime.now.date()), '%Y-%m-%d').date()
         position.created_at = datetime.strptime(input_dict['created-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
         position.updated_at = datetime.strptime(input_dict['updated-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
         return position
