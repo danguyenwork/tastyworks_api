@@ -53,5 +53,7 @@ class TastyAPISession(object):
 
     def get_request_headers(self):
         return {
-            'Authorization': self.session_token
+            'Authorization': self.session_token,
+            'accept-version': 'v1',
+            'user-agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome',
         }
