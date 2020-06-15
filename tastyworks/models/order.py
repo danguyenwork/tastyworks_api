@@ -212,6 +212,8 @@ class Order(Security):
                 raise Exception('Could not get current open orders')
             data = (await resp.json())['data']['items']
             for order_data in data:
+                if not order_data.get('price-effect'):
+                    continue
                 order = cls.from_dict(order_data)
                 if not order.details.status.is_active():
                     continue
