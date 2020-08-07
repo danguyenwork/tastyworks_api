@@ -104,6 +104,20 @@ class DataStreamer(object):
                 continue
             yield await self._consumer(msg['data'])
 
+    async def add_timeseries_sub(self, values):
+        LOGGER.debug(f'Adding timeseries subscription: {values}')
+        # TODO: fragment message if need be, max 64k
+        message = [
+            {
+                'channel': '/service/sub',
+                'clientId': self.client_id,
+                'id': self._get_nonce(),
+                'data': {
+                    'addTimeSeries': values
+                }
+            }
+        ]
+        await self._send_msg(message)
 
 class AuthExtension(aiocometd.AuthExtension):
     def __init__(self, streamer_token: str):
