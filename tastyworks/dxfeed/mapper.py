@@ -1,6 +1,6 @@
 import logging
 
-from tastyworks.dxfeed import greeks, quote, trade, summary, profile
+from tastyworks.dxfeed import candle, greeks, quote, trade, summary, profile
 
 LOGGER = logging.getLogger(__name__)
 KEY_MAP = {}
@@ -23,6 +23,8 @@ def map_message(message):
         res = summary.Summary(data=message)
     elif profile.Profile.DXFEED_TEXT == msg_type:
         res = profile.Profile(data=message)
+    elif candle.Candle.DXFEED_TEXT == msg_type:
+        res = candle.Candle(data=data)
     else:
         LOGGER.warning("Unknown message type received from streamer: {}".format(message))
         res = [{'warning': 'Unknown message type received', 'message': message}]
