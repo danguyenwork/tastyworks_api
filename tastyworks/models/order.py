@@ -55,6 +55,7 @@ class OrderDetails(object):
     time_in_force: TimeInForce = TimeInForce.DAY
     gtc_date: datetime = None
     price: Decimal = None
+    fill_price: Decimal = None
     stop_trigger: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
@@ -129,14 +130,14 @@ class Order(Security):
         details.order_id = input_dict.get('id')
         details.ticker = input_dict.get('underlying-symbol')
         details.price = Decimal(input_dict.get('price', 0))
-
+        details.fill_price = Decimal('0')
+        
         # there have been instances where there was no price in dict.
-        if details.price == 0:
-            legs = input_dict.get('legs')
-            if len(legs) > 0:
-                fills = input_dict.get('legs')[0].get('fills')
-                if len(fills) > 0:
-                    details.price = Decimal(input_dict.get('legs')[0].get('fills')[0].get('fill-price'))
+        legs = input_dict.get('legs')
+        if len(legs) > 0:
+            fills = input_dict.get('legs')[0].get('fills')
+            if len(fills) > 0:
+                details.fill_price = Decimal(input_dict.get('legs')[0].get('fills')[0].get('fill-price'))
 
         details.stop_trigger = Decimal(input_dict.get('stop-trigger', 0))
         details.price_effect = OrderPriceEffect(input_dict.get('price-effect'))
