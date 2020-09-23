@@ -55,6 +55,7 @@ class OrderDetails(object):
     time_in_force: TimeInForce = TimeInForce.DAY
     gtc_date: datetime = None
     price: Decimal = None
+    fill_price: Decimal = None
     stop_trigger: Decimal = None
     price_effect: OrderPriceEffect = None
     status: OrderStatus = None
@@ -129,8 +130,18 @@ class Order(Security):
         details.order_id = input_dict.get('id')
         details.ticker = input_dict.get('underlying-symbol')
         details.price = Decimal(input_dict.get('price', 0))
+        details.fill_price = Decimal('0')
+        
+        # there have been instances where there was no price in dict.
+        legs = input_dict.get('legs')
+        if len(legs) > 0:
+            fills = input_dict.get('legs')[0].get('fills')
+            if len(fills) > 0:
+                details.fill_price = Decimal(input_dict.get('legs')[0].get('fills')[0].get('fill-price'))
+
         details.stop_trigger = Decimal(input_dict.get('stop-trigger', 0))
-        details.price_effect = OrderPriceEffect(input_dict.get('price-effect'))
+        if input_dict.get('price-effect') != None:
+            details.price_effect = OrderPriceEffect(input_dict.get('price-effect'))
         details.type = OrderType(input_dict.get('order-type'))
         details.status = OrderStatus(input_dict.get('status'))
         details.time_in_force = input_dict.get('time-in-force')
@@ -138,6 +149,10 @@ class Order(Security):
         order = cls(order_details=details)
         for leg in input_dict.get('legs'):
             if leg.get('instrument-type') == 'Equity Option':
+                if leg.get('action') == 'Sell to Close':
+                    details.price_effect = OrderPriceEffect.CREDIT
+                elif leg.get('action') == 'Buy to Open':
+                    details.price_effect = OrderPriceEffect.DEBIT
                 leg_obj = order.get_equity_leg_from_dict(leg)
                 order.details.legs.append(leg_obj)
         return order
