@@ -24,7 +24,7 @@ def map_message(message):
     elif profile.Profile.DXFEED_TEXT == msg_type:
         res = profile.Profile(data=message)
     elif candle.Candle.DXFEED_TEXT == msg_type:
-        res = candle.Candle(data=data)
+        res = candle.Candle(data=message)
     else:
         LOGGER.warning("Unknown message type received from streamer: {}".format(message))
         res = [{'warning': 'Unknown message type received', 'message': message}]
