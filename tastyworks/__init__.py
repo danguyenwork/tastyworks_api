@@ -9,7 +9,7 @@ out_hdlr.setLevel(logging.INFO)
 log.addHandler(out_hdlr)
 log.setLevel(logging.INFO)
 
-root = logging.getLogger()
-root.addHandler(out_hdlr)
-root.propagate = False
-root.setLevel(logging.INFO)
+#root = logging.getLogger()
+#root.addHandler(out_hdlr)
+#root.propagate = False
+#root.setLevel(logging.INFO)
