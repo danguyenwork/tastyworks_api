@@ -36,6 +36,7 @@ class OrderStatus(Enum):
     LIVE = 'Live'
     REJECTED = 'Rejected'
     CANCEL_REQUESTED = 'Cancel Requested'
+    IN_FLIGHT = 'In Flight'
 
     def is_active(self):
         return self in (OrderStatus.LIVE, OrderStatus.RECEIVED, OrderStatus.CANCEL_REQUESTED)
