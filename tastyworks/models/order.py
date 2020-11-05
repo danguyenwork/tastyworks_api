@@ -37,9 +37,10 @@ class OrderStatus(Enum):
     REJECTED = 'Rejected'
     CANCEL_REQUESTED = 'Cancel Requested'
     IN_FLIGHT = 'In Flight'
+    REPLACE_REQUESTED = "Replace Requested"
 
     def is_active(self):
-        return self in (OrderStatus.LIVE, OrderStatus.RECEIVED, OrderStatus.CANCEL_REQUESTED)
+        return self in (OrderStatus.LIVE, OrderStatus.RECEIVED, OrderStatus.CANCEL_REQUESTED, OrderStatus.IN_FLIGHT, OrderStatus.REPLACE_REQUESTED)
 
 
 class TimeInForce(Enum):
