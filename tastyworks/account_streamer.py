@@ -33,12 +33,12 @@ class AccountStreamer(object):
         self.ka_thread.join()  # Kill the keep-alive thread
         self.connection.close()
 
-    async def add_account_sub(self, account_numbers):
+    def add_account_sub(self, account_numbers):
 
         LOGGER.debug(f'Adding account subscribe: {account_numbers}')
   
-        await self._send_msg(self._get_account_subscribe_msg(account_numbers))
-        #await self.connection.recv()
+        self._send_msg(self._get_account_subscribe_msg(account_numbers))
+        #self.connection.recv()
 
     def __get_action_msg(self, action, value=None, request_id=None) -> List:
         msg = {
@@ -57,24 +57,24 @@ class AccountStreamer(object):
     def _get_heartbeat_msg(self) -> List:
         return self.__get_action_msg('heartbeat')
 
-    async def _consumer(self, message):
+    def _consumer(self, message):
         msg_object = json.loads(message)
         LOGGER.debug('Object conversion: %s', msg_object)
         return msg_object
 
-    async def _send_msg(self, message):
+    def _send_msg(self, message):
         if not isinstance(message, str):
             message = json.dumps(message)
         LOGGER.debug('[acctFeed] sending: %s', message)
-        await self.connection.send(message)
+        self.connection.send(message)
   
     def _get_streamer_websocket_url(self):
         return 'wss://streamer.tastyworks.com/'
 
-    async def _setup_connection(self):
+    def _setup_connection(self):
         streamer_url = self._get_streamer_websocket_url()
         LOGGER.info('Connecting to url: %s', streamer_url)
-        socket = await websockets.connect(streamer_url)
+        socket = websockets.connect(streamer_url)
 
         self.connection = socket
 
@@ -95,7 +95,7 @@ class AccountStreamer(object):
         LOGGER.info('Starting keep-alive thread with period: %s ms', period)
         asyncio.run_coroutine_threadsafe(self._keep_alive(period), loop)
 
-    async def _keep_alive(self, period: int):
+    def _keep_alive(self, period: int):
         """
         Handles the keep-alive message.
         Args:
@@ -103,13 +103,13 @@ class AccountStreamer(object):
         """
         while True:
             LOGGER.debug('Sending keep-alive message')
-            await self._send_msg(self._get_heartbeat_msg())
-            await asyncio.sleep(period / 5000)
+            self._send_msg(self._get_heartbeat_msg())
+            asyncio.sleep(period / 5000)
 
-    async def listen(self):
-        async for msg in self.connection:
+    def listen(self):
+        for msg in self.connection:
             LOGGER.debug('[acctFeed] received: %s', msg)
-            res = await self._consumer(msg)
+            res = self._consumer(msg)
             if not res:
                 continue
             yield res

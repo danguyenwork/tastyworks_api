@@ -117,7 +117,8 @@ class Order(Security):
         self.details.legs.append(security)
 
     def get_equity_leg_from_dict(self, input_dict: dict):
-        exp_date = datetime.strptime(input_dict['symbol'][6:12], '%y%m%d').date()
+        exp_date = datetime.strptime(
+            input_dict['symbol'][6:12], '%y%m%d').date()
         option_type = OptionType(input_dict['symbol'][12:13])
         strike = Decimal(input_dict['symbol'][13:]) / 1000
         return Option(ticker=self.details.ticker, quantity=input_dict['quantity'], expiry=exp_date, strike=strike, option_type=option_type, underlying_type=UnderlyingType.EQUITY)
@@ -128,22 +129,25 @@ class Order(Security):
         Parses an Order object from a dict.
         """
         input_dict = input_dict.get('order') or input_dict
-        details = OrderDetails(input_dict.get('underlying-symbol')) or OrderDetails(input_dict.get('symbol'))
+        details = OrderDetails(input_dict.get(
+            'underlying-symbol')) or OrderDetails(input_dict.get('symbol'))
         details.order_id = input_dict.get('id')
         details.ticker = input_dict.get('underlying-symbol')
         details.price = Decimal(input_dict.get('price', 0))
         details.fill_price = Decimal('0')
-        
+
         # there have been instances where there was no price in dict.
         legs = input_dict.get('legs')
         if len(legs) > 0:
             fills = input_dict.get('legs')[0].get('fills')
             if len(fills) > 0:
-                details.fill_price = Decimal(input_dict.get('legs')[0].get('fills')[0].get('fill-price'))
+                details.fill_price = Decimal(input_dict.get(
+                    'legs')[0].get('fills')[0].get('fill-price'))
 
         details.stop_trigger = Decimal(input_dict.get('stop-trigger', 0))
         if input_dict.get('price-effect') != None:
-            details.price_effect = OrderPriceEffect(input_dict.get('price-effect'))
+            details.price_effect = OrderPriceEffect(
+                input_dict.get('price-effect'))
         details.type = OrderType(input_dict.get('order-type'))
         details.status = OrderStatus(input_dict.get('status'))
         details.time_in_force = input_dict.get('time-in-force')
@@ -160,7 +164,7 @@ class Order(Security):
         return order
 
     @classmethod
-    async def get_remote_orders(cls, session, account, **kwargs) -> List:
+    def get_remote_orders(cls, session, account, **kwargs) -> List:
         """
         Gets all orders on Tastyworks.
 
@@ -187,17 +191,17 @@ class Order(Security):
         )
 
         res = []
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
+        with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
             if resp.status != 200:
                 raise Exception('Could not get current open orders')
-            data = (await resp.json())['data']['items']
+            data = (resp.json())['data']['items']
             for order_data in data:
                 order = cls.from_dict(order_data)
                 res.append(order)
         return res
 
     @classmethod
-    async def get_live_orders(cls, session, account, **kwargs) -> List:
+    def get_live_orders(cls, session, account, **kwargs) -> List:
         """
         Gets all live orders on Tastyworks.
 
@@ -224,10 +228,10 @@ class Order(Security):
         )
 
         res = []
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
+        with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
             if resp.status != 200:
                 raise Exception('Could not get current open orders')
-            data = (await resp.json())['data']['items']
+            data = (resp.json())['data']['items']
             for order_data in data:
                 if not order_data.get('price-effect'):
                     continue
@@ -238,7 +242,7 @@ class Order(Security):
         return res
 
     @classmethod
-    async def cancel_order(cls, session, account, order_id):
+    def cancel_order(cls, session, account, order_id):
         """
         cancels an order on Tastyworks.
 
@@ -259,15 +263,15 @@ class Order(Security):
             order_id
         )
 
-        async with aiohttp.request('DELETE', url, headers=session.get_request_headers()) as resp:
+        with aiohttp.request('DELETE', url, headers=session.get_request_headers()) as resp:
             if resp.status != 200:
                 raise Exception('Could not delete the order')
-            data = (await resp.json())['data']
+            data = (resp.json())['data']
             order = cls.from_dict(data)
             return order.details.status
 
     @classmethod
-    async def get_order(cls, session, account, order_id):
+    def get_order(cls, session, account, order_id):
         """
         gets an order by the order id on Tastyworks.
 
@@ -288,9 +292,9 @@ class Order(Security):
             order_id
         )
 
-        async with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
+        with aiohttp.request('GET', url, headers=session.get_request_headers()) as resp:
             if resp.status != 200:
                 raise Exception('Could not retreive the order')
-            data = (await resp.json())['data']
+            data = (resp.json())['data']
             order = cls.from_dict(data)
             return order

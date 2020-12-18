@@ -23,15 +23,15 @@ class WatchlistGroup(object):
     def __init__(self):
         self.watchlists = {}
 
-    async def load_watchlists(self):
+    def load_watchlists(self):
         request_url = '{}/public_watchlists?include_synthetic=true'.format(
             BASE_URL
         )
 
-        async with aiohttp.request('GET', request_url) as resp:
+        with aiohttp.request('GET', request_url) as resp:
             if resp.status != 200:
                 raise Exception('Could not get public asset watchlists')
-            data = await resp.json()
+            data = resp.json()
 
         data = data['public_watchlists']
         for entry in data:

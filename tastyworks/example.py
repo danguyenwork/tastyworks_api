@@ -18,7 +18,7 @@ from tastyworks.tastyworks_api import tasty_session
 LOGGER = logging.getLogger(__name__)
 
 
-async def main_loop(session: TastyAPISession, streamer: DataStreamer):
+def main_loop(session: TastyAPISession, streamer: DataStreamer):
     # sub_values = {
     #     "Greeks": [
     #         ".VIX180718C21",
@@ -29,11 +29,11 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
         "Quote": ["/ES"]
     }
 
-    accounts = await TradingAccount.get_remote_accounts(session)
+    accounts = TradingAccount.get_remote_accounts(session)
     acct = accounts[0]
     LOGGER.info('Accounts available: %s', accounts)
 
-    orders = await Order.get_remote_orders(session, acct)
+    orders = Order.get_remote_orders(session, acct)
     LOGGER.info('Number of active orders: %s', len(orders))
 
     # Execute an order
@@ -54,18 +54,18 @@ async def main_loop(session: TastyAPISession, streamer: DataStreamer):
     )
     new_order.add_leg(opt)
 
-    res = await acct.execute_order(new_order, session, dry_run=True)
+    res = acct.execute_order(new_order, session, dry_run=True)
     LOGGER.info('Order executed successfully: %s', res)
 
     # Get an options chain
     undl = underlying.Underlying('AKS')
 
-    chain = await option_chain.get_option_chain(session, undl)
+    chain = option_chain.get_option_chain(session, undl)
     LOGGER.info('Chain strikes: %s', chain.get_all_strikes())
 
-    await streamer.add_data_sub(sub_values)
+    streamer.add_data_sub(sub_values)
 
-    async for item in streamer.listen():
+    for item in streamer.listen():
         LOGGER.info('Received item: %s' % item.data)
 
 

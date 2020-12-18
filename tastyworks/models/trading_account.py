@@ -44,11 +44,13 @@ class TradingAccount(object):
 
         with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
             if resp.status == 201:
-                return Order.from_dict((await resp.json()).get('data')).details
+                return Order.from_dict((resp.json()).get('data')).details
             elif resp.status == 400:
-                raise Exception('Order execution failed, message: {}'.format(await resp.text()))
+                raise Exception(
+                    'Order execution failed, message: {}'.format(resp.text()))
             else:
-                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(
+                    resp.status, resp.text()))
 
     def replace_order(self, order: Order, session, dry_run=True):
         """
@@ -82,11 +84,13 @@ class TradingAccount(object):
 
         with aiohttp.request('PATCH', url, headers=session.get_request_headers(), json=body) as resp:
             if resp.status == 200:
-                return Order.from_dict((await resp.json()).get('data')).details
+                return Order.from_dict((resp.json()).get('data')).details
             elif resp.status == 400:
-                raise Exception('Order execution failed, message: {}'.format(await resp.text()))
+                raise Exception(
+                    'Order execution failed, message: {}'.format(resp.text()))
             else:
-                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(
+                    resp.status, resp.text()))
 
     @classmethod
     def from_dict(cls, data: dict) -> List:
@@ -121,7 +125,7 @@ class TradingAccount(object):
             if response.status != 200:
                 raise Exception(
                     'Could not get trading accounts info from Tastyworks...')
-            data = (await response.json())['data']
+            data = (response.json())['data']
 
         for entry in data['items']:
             if entry['authority-level'] != 'owner':
@@ -151,7 +155,7 @@ class TradingAccount(object):
             if response.status != 200:
                 raise Exception(
                     'Could not get trading account balance info from Tastyworks...')
-            data = (await response.json())['data']
+            data = (response.json())['data']
         return data
 
     def get_quote_alert(session):
@@ -170,7 +174,7 @@ class TradingAccount(object):
             if response.status != 200:
                 raise Exception(
                     'Could not get quote alerts from Tastyworks...')
-            data = Alert.from_dict((await response.json())['data']['items'])
+            data = Alert.from_dict((response.json())['data']['items'])
         return data
 
     def set_quote_alert(session, alert: Alert):
@@ -196,9 +200,11 @@ class TradingAccount(object):
             if resp.status == 201:
                 return True
             elif resp.status == 400:
-                raise Exception('Failed to create the alert, message: {}'.format(await resp.text()))
+                raise Exception(
+                    'Failed to create the alert, message: {}'.format(resp.text()))
             else:
-                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(
+                    resp.status, resp.text()))
 
     def delete_quote_alert(session, alert: Alert):
         """
@@ -228,9 +234,11 @@ class TradingAccount(object):
             if resp.status == 204:
                 return True
             elif resp.status == 400:
-                raise Exception('Failed to delete the quote alert, message: {}'.format(await resp.text()))
+                raise Exception(
+                    'Failed to delete the quote alert, message: {}'.format(resp.text()))
             else:
-                raise Exception('Unknown remote error, status code: {}, message: {}'.format(resp.status, await resp.text()))
+                raise Exception('Unknown remote error, status code: {}, message: {}'.format(
+                    resp.status, resp.text()))
 
     def get_positions(session, account):
         """
@@ -251,7 +259,7 @@ class TradingAccount(object):
             if response.status != 200:
                 raise Exception(
                     'Could not get open positions info from Tastyworks...')
-            data = Position.list_from_dict((await response.json())['data']['items'])
+            data = Position.list_from_dict((response.json())['data']['items'])
         return data
 
     def get_live_orders(session, account):
@@ -273,7 +281,7 @@ class TradingAccount(object):
             if response.status != 200:
                 raise Exception(
                     'Could not get live orders info from Tastyworks...')
-            data = (await response.json())['data']['items']
+            data = (response.json())['data']['items']
         return data
 
     def get_history(session, account):
@@ -295,7 +303,7 @@ class TradingAccount(object):
             if response.status != 200:
                 raise Exception(
                     'Could not get history info from Tastyworks...')
-            data = (await response.json())['data']
+            data = (response.json())['data']
         return data
 
 

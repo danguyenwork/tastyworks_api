@@ -18,7 +18,7 @@ class OptionChain(object):
 
     Example usage:
         symbol = "AAPL"
-        response = await client.get_option_chains(symbol)
+        response = client.get_option_chains(symbol)
         oc = OptionChain(OptionChain.parse(symbol, response))
 
         for strike in oc.get_all_strikes():
@@ -49,9 +49,9 @@ class OptionChain(object):
         return self._get_filter_strategy('expiry')
 
 
-async def get_option_chain(session, underlying: Underlying, expiration: date = None) -> OptionChain:
+def get_option_chain(session, underlying: Underlying, expiration: date = None) -> OptionChain:
     LOGGER.debug('Getting options chain for ticker: %s', underlying.ticker)
-    data = await _get_tasty_option_chain_data(session, underlying)
+    data = _get_tasty_option_chain_data(session, underlying)
     res = []
 
     for exp in data['expirations']:
@@ -74,15 +74,15 @@ async def get_option_chain(session, underlying: Underlying, expiration: date = N
     return OptionChain(res)
 
 
-async def _get_tasty_option_chain_data(session, underlying) -> Dict:
-    async with aiohttp.request(
+def _get_tasty_option_chain_data(session, underlying) -> Dict:
+    with aiohttp.request(
             'GET',
             f'{session.API_url}/option-chains/{underlying.ticker}/nested',
             headers=session.get_request_headers()) as response:
 
         if response.status != 200:
             raise Exception(f'Could not find option chain for symbol {underlying.ticker}')
-        resp = await response.json()
+        resp = response.json()
 
         # NOTE: Have not seen an example with more than 1 item. No idea what that would be.
         return resp['data']['items'][0]

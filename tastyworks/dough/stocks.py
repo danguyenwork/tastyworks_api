@@ -3,7 +3,7 @@ import aiohttp
 from tastyworks.dough import BASE_URL
 
 
-async def stock_search(symbols):
+def stock_search(symbols):
     """
     Performs a stock search through the dough API.
 
@@ -25,11 +25,11 @@ async def stock_search(symbols):
         'symbols': symbols
     }
 
-    async with aiohttp.request('POST', request_url, json=payload) as resp:
+    with aiohttp.request('POST', request_url, json=payload) as resp:
         if resp.status != 200:
             raise Exception(
                 'Searching for stocks {} failed'.format(', '.join(payload['symbols']))
             )
-        data = await resp.json()
+        data = resp.json()
 
     return data["stocks"]
