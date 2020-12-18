@@ -1,7 +1,8 @@
 from datetime import date, datetime
 from decimal import Decimal
 from tastyworks.models.alert import Alert, AlertField, Operator
-from tastyworks.models.order import (Order, OrderDetails, OrderPriceEffect, OrderType)
+from tastyworks.models.order import (
+    Order, OrderDetails, OrderPriceEffect, OrderType)
 from tastyworks.models.option import Option, OptionType
 from tastyworks.models.underlying import UnderlyingType
 from enum import Enum
@@ -16,6 +17,7 @@ class PositionCostEffect(Enum):
 
 class InstrumentType(Enum):
     EQUITY_OPTION = 'Equity Option'
+    EQUITY = 'Equity'
     NONE = None
 
 
@@ -69,7 +71,8 @@ class Position(object):
 
     def get_closing_order_object(self, price: Decimal, stop_trigger: Decimal = None, order_type: OrderType = OrderType.LIMIT):
         closing_order_price_effect = self.get_closing_order_price_effect()
-        details = OrderDetails(type=order_type, price=price, price_effect=closing_order_price_effect, stop_trigger=stop_trigger)
+        details = OrderDetails(type=order_type, price=price,
+                               price_effect=closing_order_price_effect, stop_trigger=stop_trigger)
         new_order = Order(details)
         opt = self.get_option_obj()
         new_order.add_leg(opt)
@@ -96,13 +99,16 @@ class Position(object):
         position = cls(input_dict)
         position.account_number = input_dict['account-number']
         position.symbol = input_dict['symbol']
-        position.instrument_type = InstrumentType(input_dict['instrument-type'])
+        position.instrument_type = InstrumentType(
+            input_dict['instrument-type'])
         position.underlying_symbol = input_dict['underlying-symbol']
         position.quantity = int(input_dict['quantity'])
-        position.quantity_direction = QuantityDirection(input_dict['quantity-direction'])
+        position.quantity_direction = QuantityDirection(
+            input_dict['quantity-direction'])
         position.close_price = Decimal(input_dict['close-price'])
         position.average_open_price = Decimal(input_dict['average-open-price'])
-        position.average_yearly_market_close_price = Decimal(input_dict.get('average-yearly-market-close-price', 0))
+        position.average_yearly_market_close_price = Decimal(
+            input_dict.get('average-yearly-market-close-price', 0))
         position.mark = Decimal(input_dict.get('mark', 0))
         position.mark_price = Decimal(input_dict.get('mark-price', 0))
         position.multiplier = int(input_dict['multiplier'])
@@ -111,10 +117,14 @@ class Position(object):
         position.is_frozen = bool(input_dict['is-frozen'])
         position.restricted_quantity = int(input_dict['restricted-quantity'])
         position.realized_day_gain = Decimal(input_dict['realized-day-gain'])
-        position.realized_day_gain_effect = PositionCostEffect(input_dict.get('realized-day-gain-effect', PositionCostEffect.NONE))
-        position.realized_day_gain_date = datetime.strptime(input_dict.get('realized-day-gain-date', str(datetime.now().date())), '%Y-%m-%d').date()
-        position.created_at = datetime.strptime(input_dict['created-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
-        position.updated_at = datetime.strptime(input_dict['updated-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
+        position.realized_day_gain_effect = PositionCostEffect(
+            input_dict.get('realized-day-gain-effect', PositionCostEffect.NONE))
+        position.realized_day_gain_date = datetime.strptime(input_dict.get(
+            'realized-day-gain-date', str(datetime.now().date())), '%Y-%m-%d').date()
+        position.created_at = datetime.strptime(
+            input_dict['created-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
+        position.updated_at = datetime.strptime(
+            input_dict['updated-at'].split('+')[0], '%Y-%m-%dT%H:%M:%S.%f')
         return position
 
     @classmethod
