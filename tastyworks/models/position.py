@@ -61,7 +61,8 @@ class Position(object):
         exp_date = datetime.strptime(self.symbol[6:12], '%y%m%d').date()
         option_type = OptionType(self.symbol[12:13])
         strike = Decimal(self.symbol[13:]) / 1000
-        return Option(ticker=self.underlying_symbol, quantity=self.quantity, expiry=exp_date, strike=strike, option_type=option_type, underlying_type=UnderlyingType.EQUITY)
+        average_open_price = Decimal(self.average_open_price)
+        return Option(symbol=self.symbol, ticker=self.underlying_symbol, quantity=self.quantity, expiry=exp_date, strike=strike, option_type=option_type, underlying_type=UnderlyingType.EQUITY, average_open_price=average_open_price, created_at=self.created_at, quantity_direction=self.quantity_direction)
 
     def get_closing_order_price_effect(self):
         if self.cost_effect == PositionCostEffect.CREDIT:
@@ -96,7 +97,6 @@ class Position(object):
         """
         Parses a Position object from a dict.
         """
-        print(input_dict)
         position = cls(input_dict)
         position.account_number = input_dict['account-number']
         position.symbol = input_dict['symbol']

@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from enum import Enum
-
+import datetime
 from dataclasses import dataclass
 
 from tastyworks.models.security import Security
@@ -15,12 +15,16 @@ class OptionType(Enum):
 
 @dataclass
 class Option(Security):
+    symbol: str
     ticker: str
     expiry: date
     strike: Decimal
     option_type: OptionType
     underlying_type: UnderlyingType
+    created_at: datetime.datetime
+    quantity_direction: str
     quantity: int = 1
+    average_open_price: Decimal = 0
 
     def _get_underlying_type_string(self, underlying_type: UnderlyingType):
         if underlying_type == UnderlyingType.EQUITY:
