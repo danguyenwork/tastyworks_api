@@ -96,6 +96,7 @@ class Position(object):
         """
         Parses a Position object from a dict.
         """
+        print(input_dict)
         position = cls(input_dict)
         position.account_number = input_dict['account-number']
         position.symbol = input_dict['symbol']

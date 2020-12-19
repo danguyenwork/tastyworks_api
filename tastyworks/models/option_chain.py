@@ -3,7 +3,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Dict
 
-import aiohttp
+import requests
 
 from tastyworks.models.option import Option, OptionType
 from tastyworks.models.underlying import Underlying, UnderlyingType
@@ -75,13 +75,13 @@ def get_option_chain(session, underlying: Underlying, expiration: date = None) -
 
 
 def _get_tasty_option_chain_data(session, underlying) -> Dict:
-    with aiohttp.request(
-            'GET',
+    with requests.get(
             f'{session.API_url}/option-chains/{underlying.ticker}/nested',
             headers=session.get_request_headers()) as response:
 
-        if response.status != 200:
-            raise Exception(f'Could not find option chain for symbol {underlying.ticker}')
+        if response.status_code != 200:
+            raise Exception(
+                f'Could not find option chain for symbol {underlying.ticker}')
         resp = response.json()
 
         # NOTE: Have not seen an example with more than 1 item. No idea what that would be.

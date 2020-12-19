@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from tastyworks.models.order import Order, OrderPriceEffect, OrderType
 from tastyworks.models.alert import Alert
 from tastyworks.models.position import Position
+import requests
 
 
 @dataclass
@@ -42,15 +43,15 @@ class TradingAccount(object):
 
         body = _get_execute_order_json(order)
 
-        with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
-            if resp.status == 201:
+        with requests.post(url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status_code == 201:
                 return Order.from_dict((resp.json()).get('data')).details
-            elif resp.status == 400:
+            elif resp.status_code == 400:
                 raise Exception(
                     'Order execution failed, message: {}'.format(resp.text()))
             else:
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(
-                    resp.status, resp.text()))
+                    resp.status_code, resp.text()))
 
     def replace_order(self, order: Order, session, dry_run=True):
         """
@@ -82,15 +83,15 @@ class TradingAccount(object):
         body = _get_execute_order_json(order)
         del body['legs']
 
-        with aiohttp.request('PATCH', url, headers=session.get_request_headers(), json=body) as resp:
-            if resp.status == 200:
+        with requests.patch(url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status_code == 200:
                 return Order.from_dict((resp.json()).get('data')).details
-            elif resp.status == 400:
+            elif resp.status_code == 400:
                 raise Exception(
                     'Order execution failed, message: {}'.format(resp.text()))
             else:
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(
-                    resp.status, resp.text()))
+                    resp.status_code, resp.text()))
 
     @classmethod
     def from_dict(cls, data: dict) -> List:
@@ -121,8 +122,8 @@ class TradingAccount(object):
         url = f'{session.API_url}/customers/me/accounts'
         res = []
 
-        with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
+        with requests.get(url, headers=session.get_request_headers()) as response:
+            if response.status_code != 200:
                 raise Exception(
                     'Could not get trading accounts info from Tastyworks...')
             data = (response.json())['data']
@@ -151,8 +152,8 @@ class TradingAccount(object):
             account.account_number
         )
 
-        with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
+        with requests.get(url, headers=session.get_request_headers()) as response:
+            if response.status_code != 200:
                 raise Exception(
                     'Could not get trading account balance info from Tastyworks...')
             data = (response.json())['data']
@@ -170,8 +171,8 @@ class TradingAccount(object):
         """
         url = '{}/quote-alerts'.format(session.API_url)
 
-        with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
+        with requests.get(url, headers=session.get_request_headers()) as response:
+            if response.status_code != 200:
                 raise Exception(
                     'Could not get quote alerts from Tastyworks...')
             data = Alert.from_dict((response.json())['data']['items'])
@@ -196,15 +197,15 @@ class TradingAccount(object):
 
         body = alert.get_json()
 
-        with aiohttp.request('POST', url, headers=session.get_request_headers(), json=body) as resp:
-            if resp.status == 201:
+        with requests.post(url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status_code == 201:
                 return True
-            elif resp.status == 400:
+            elif resp.status_code == 400:
                 raise Exception(
                     'Failed to create the alert, message: {}'.format(resp.text()))
             else:
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(
-                    resp.status, resp.text()))
+                    resp.status_code, resp.text()))
 
     def delete_quote_alert(session, alert: Alert):
         """
@@ -230,15 +231,15 @@ class TradingAccount(object):
 
         body = alert.get_json()
 
-        with aiohttp.request('DELETE', url, headers=session.get_request_headers(), json=body) as resp:
-            if resp.status == 204:
+        with requests.delete(url, headers=session.get_request_headers(), json=body) as resp:
+            if resp.status_code == 204:
                 return True
-            elif resp.status == 400:
+            elif resp.status_code == 400:
                 raise Exception(
                     'Failed to delete the quote alert, message: {}'.format(resp.text()))
             else:
                 raise Exception('Unknown remote error, status code: {}, message: {}'.format(
-                    resp.status, resp.text()))
+                    resp.status_code, resp.text()))
 
     def get_positions(session, account):
         """
@@ -255,8 +256,8 @@ class TradingAccount(object):
             account.account_number
         )
 
-        with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
+        with requests.get(url, headers=session.get_request_headers()) as response:
+            if response.status_code != 200:
                 raise Exception(
                     'Could not get open positions info from Tastyworks...')
             data = Position.list_from_dict((response.json())['data']['items'])
@@ -277,8 +278,8 @@ class TradingAccount(object):
             account.account_number
         )
 
-        with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
+        with requests.get(url, headers=session.get_request_headers()) as response:
+            if response.status_code != 200:
                 raise Exception(
                     'Could not get live orders info from Tastyworks...')
             data = (response.json())['data']['items']
@@ -299,8 +300,8 @@ class TradingAccount(object):
             account.account_number
         )
 
-        with aiohttp.request('GET', url, headers=session.get_request_headers()) as response:
-            if response.status != 200:
+        with requests.get(url, headers=session.get_request_headers()) as response:
+            if response.status_code != 200:
                 raise Exception(
                     'Could not get history info from Tastyworks...')
             data = (response.json())['data']
